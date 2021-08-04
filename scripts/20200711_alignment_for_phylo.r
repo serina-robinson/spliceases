@@ -56,10 +56,11 @@ writeXStringSet(dedup, "data/seqs_for_phylogeny/3418_expanded_blast_seqs_for_phy
 # Trim alignment using trimal
 # trimal -in 3418_expanded_blast_seqs_for_phylo_names_fixed_2iters.afa -gt 0.1 -htmlout 3418_aligned.html > 3418_expanded_blast_seqs_for_phylo_v2_aligned_2iters_trimmed.fasta
 
-# Do a quick tree with FastTree
+# Approx. maximum-likelihood with FastTree
 # fasttree <3418_expanded_blast_seqs_for_phylo_v2_aligned_2iters_trimmed.fasta> 3418_fasttree_gt_10.nwk
 
 aln_raw <- readAAStringSet("data/seqs_for_phylogeny/3418_expanded_blast_seqs_for_phylo_names_fixed_2iters.afa")
 aln <- readAAStringSet("data/seqs_for_phylogeny/3418_expanded_blast_seqs_for_phylo_v2_aligned_2iters_trimmed.fasta")
 
+# Final phylogenetic tree
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")

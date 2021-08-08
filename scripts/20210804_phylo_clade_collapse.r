@@ -4,7 +4,7 @@ pacman::p_load("ggtree", "stringr", "ggrepel", "dplyr", "scales", "phytools",
                "ggtreeExtra", "ggnewscale", "readr", "RColorBrewer", "microshades")
 
 # Set color-blind friendly color palette
-hex_values <- NULL
+
 hex_values <-c(microshades_palette("micro_cvd_purple", 1, lightest = TRUE), 
                microshades_palette("micro_cvd_blue", 2, lightest = TRUE)[2],
                microshades_palette("micro_cvd_green", 2, lightest = TRUE)[2],
@@ -12,6 +12,16 @@ hex_values <-c(microshades_palette("micro_cvd_purple", 1, lightest = TRUE),
                microshades_palette("micro_brown", 2, lightest = TRUE)[2],
                microshades_palette("micro_orange", 1, lightest = TRUE),
                microshades_palette("micro_cvd_gray", 3, lightest = TRUE)[3])
+hex_values
+
+pal2 <- c("#6b68d4",
+          "#55bec5",
+          "#EFB6D6",
+          "forestgreen",
+          "#feeda0",
+          "#CAA995",
+          "#48C9B0",
+          "#B7B7B7")
 
 
 # Read in tree and trim
@@ -53,6 +63,7 @@ gdf +
   theme(legend.position = "none") +
   xlim_tree(5)
 dev.off()
+
 
 pdf(paste0("output/trees/20210804_spliceases_only_full_labels_with_archaea.pdf"), width = 21.59, height = 27.94)
 gdf + 

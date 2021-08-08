@@ -4,15 +4,17 @@ pacman::p_load("data.table", "tidyverse", "RColorBrewer",
 
 # Read in the consensus tree
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
-dend <- read_csv("data/dendrogram_cuts/20200911_dendrogram_cutting_20grps.csv")
-colnames(dend)[2] <- "dendcut"
-singletons <- as.numeric(names(table(dend$dendcut)[table(dend$dendcut) <= 100]))
-dendr <- dend %>%
-  dplyr::mutate(dendrsplit = case_when(dendcut %in% singletons ~ "singleton",
-                                       TRUE ~ as.character(dendcut)))
+# dend <- read_csv("data/dendrogram_cuts/20200911_dendrogram_cutting_20grps.csv")
+# colnames(dend)[2] <- "dendcut"
+# singletons <- as.numeric(names(table(dend$dendcut)[table(dend$dendcut) <= 100]))
+# dendr <- dend %>%
+#   dplyr::mutate(dendrsplit = case_when(dendcut %in% singletons ~ "singleton",
+#                                        TRUE ~ as.character(dendcut)))
+# dendr
+
 
 groupInfo <- split(tr$tip.label, dendr$dendrsplit)
-table(dendr$dendrsplit)
+
 phylip <- groupOTU(tr, groupInfo)
 gtfake <- ggtree(phylip)
 

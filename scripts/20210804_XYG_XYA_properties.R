@@ -13,12 +13,11 @@ querselect <- case_when(grepl("WP_|NP_|YP_", seqselect) ~
 
 # Set neighborhood size
 # Radical SAM is usually 6
-nbsize <- c(5, 7) 
+# nbsize <- c(5, 7) 
 # nbsize <- c(4, 5, 7, 8)
-# nbsize <- c(3, 4, 5, 7, 8, 9)
+nbsize <- c(3, 4, 5, 7, 8, 9)
 # nbsize <- c(2, 3, 4, 5, 7, 8, 9, 10) 
 # nbsize  <- c(1, 2, 3, 4, 5, 7, 8, 9, 10, 11)
-
 
 
 # Filter only for spliceases
@@ -42,6 +41,13 @@ ya_dat <- gbardat %>%
   dplyr::filter(grepl("ya_", variable)) 
 ya_dat$value <- factor(ya_dat$value, levels = relevel_sort)
 ya_dat
+
+# Probe the number of unique XYA and XYG hits
+overlap <- length(intersect(unique(yg_dat$protein_acc), unique(ya_dat$protein_acc)))
+xyg_unique <- length(unique(yg_dat$protein_acc)) #- overlap
+xya_unique <- length(unique(ya_dat$protein_acc)) #- overlap
+
+
 
 # Set color palette
 hex_values <-c(microshades_palette("micro_purple", 4, lightest = TRUE)[4], 
@@ -141,7 +147,7 @@ layout <- '
 AABB
 CCDD'
 # Print out everything in one PDF
-pdf("output/supplemental_YA_YG.pdf", width = 8.5, height = 4)
+pdf("output/supplemental_YA_YG.pdf", width = 8, height = 8)
 wrap_plots(
   A = ygbar_2,
   B= ygbar_6,

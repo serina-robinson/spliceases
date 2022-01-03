@@ -26,9 +26,11 @@ pal2 <- c("#6b68d4",
 # Read in tree and trim
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
 torem <- readLines("data/20210601_spliceases_cut_from_dendro.txt") 
-length(torem)
 newtr <- keep.tip(tr, grep(paste0(torem, collapse = "|"), tr$tip.label))
+length(torem)
+write.tree(newtr, file = "data/seqs_for_phylogeny/966_seqs_splicease_phylo.nwk")
 midtr <- midpoint.root(newtr)
+write.tree(midtr, file = "data/seqs_for_phylogeny/966_seqs_splicease_phylo_rooted_at_midpoint.nwk")
 
 # Clades to collapse
 

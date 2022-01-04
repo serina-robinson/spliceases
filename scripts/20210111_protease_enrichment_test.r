@@ -74,8 +74,6 @@ plt3 <- ggplot(datjoin, aes(is_splicease, prot_count)) +
 plt3
 dev.off()
 
-
-
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Splicease"]))
 hist(log(datjoin$yg_density[datjoin$is_splicease == "Splicease"]))
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Other rSAM-SPASM"]))

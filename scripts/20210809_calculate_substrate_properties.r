@@ -25,7 +25,7 @@ querselect <- case_when(grepl("WP_|NP_|YP_", seqselect) ~
                         "_", word(seqselect, 2, sep = "_")),
                         TRUE ~ paste0(word(seqselect, 1, sep = "_")))
 
-gbardat$query
+
 gbardat <- read_csv("data/XYG_count_data/combined_YG_count_data.csv") %>%
   dplyr::filter(grepl(paste0(querselect, collapse = "|"), query_acc)) %>%
   #dplyr::filter(query_acc %in% querselect) %>%
@@ -35,7 +35,7 @@ gbardat <- read_csv("data/XYG_count_data/combined_YG_count_data.csv") %>%
 ctrl_aa <- AAStringSet(gbardat$aa)
 names(ctrl_aa) <- paste0(gbardat$row_id, "_", gbardat$query_acc, "_", gbardat$protein_acc, 
                                                "_", gbardat$genus_species, "_", gbardat$name1)
-writeXStringSet(ctrl_aa, "data/533_control_rSAM_SPASM_seqs.fasta")
+# writeXStringSet(ctrl_aa, "data/533_control_rSAM_SPASM_seqs.fasta")
 
 # MEME suite
 # https://meme-suite.org/meme/info/status?service=AME&id=appAME_5.3.31628507280967550018493

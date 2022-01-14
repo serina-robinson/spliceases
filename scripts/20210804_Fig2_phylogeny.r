@@ -53,7 +53,7 @@ metadat <- data.frame(label = gtr$data$label[gtr$data$isTip]) %>%
 gdf <- gtr %<+% metadat
 
 # Set neighborhood size
-# Radical SAM is usually 6
+# Radical SAM is usually in position 6
 # nbsize <- c(5, 7) 
 # bsize <- c(4, 5, 7, 8)
 nbsize <- c(3, 4, 5, 7, 8, 9)

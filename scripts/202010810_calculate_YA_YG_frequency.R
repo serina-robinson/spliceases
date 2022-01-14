@@ -7,7 +7,8 @@ char1 <- read_csv("data/rodeo2_output/characterized_main_co_occur.csv") %>%
   janitor::clean_names() %>%
   dplyr::mutate(acc_cln = word(protein_acc, sep = "\\.1", 1)) %>%
   dplyr::group_by(query) %>%
-  add_tally(., name = "nb_size") %>%
+  add_tally(., name = "nb_size
+              ") %>%
   dplyr::mutate(row_id = row_number()) %>%
   ungroup() %>%
   select(-contains("x"))

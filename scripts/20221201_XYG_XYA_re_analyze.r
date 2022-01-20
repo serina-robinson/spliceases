@@ -61,10 +61,11 @@ yg_max_3 <- yg_dat %>%
   dplyr::filter(row_id %in% c(3,4,5,7,8,9)) %>%
   dplyr::filter(!duplicated(protein_acc)) %>%
   dplyr::arrange(aa_len) %>%
-  dplyr::slice(1:20, (nrow(.)-19):nrow(.)) %>%
+  dplyr::filter(aa_len >= 600) %>%
+ #  dplyr::slice((nrow(.)-40):nrow(.)) %>%
   dplyr::select(row_id, query, genus_species, nucleotide_acc, protein_acc, name1,
                 pfam_id1, description1, aa, aa_len)
-write_csv(yg_max_3, "output/xyg_plus_minus_3_ORFs.csv")
+write_csv(yg_max_3, "output/longest_substrates_xyg_plus_minus_3_ORFs.csv")
 
 yg_max_1 <- yg_dat %>%
   dplyr::mutate(aa_len = width(aa)) %>%

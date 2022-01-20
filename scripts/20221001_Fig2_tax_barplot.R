@@ -124,6 +124,9 @@ sumdat <- taxdat %>%
   dplyr::distinct(tax_fill, .keep_all = T)
 sum(sumdat$perc)
 
+
+pal4 
+
 pdf("output/taxa_barplot_percentage_horizontal_stacked.pdf", width = 10, height = 4)
 ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +
   geom_bar(position = "stack", stat = "identity") +
@@ -151,6 +154,10 @@ ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +
 #       #   axis.text.y = element_blank(),
 #       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
+
+colordf <- data.frame(color = pal4,
+taxa = sort(unique(sumdat$tax_fill)))
+write_csv(colordf, 'data/palette_taxa.csv')
 
 pdf("output/taxa_barplot_percentage_horizontal_wide.pdf", width = 14, height = 3.5)
 ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +

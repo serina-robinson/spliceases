@@ -1,6 +1,6 @@
 # Install packages
-pacman::p_load("ggtree", "stringr", "ggrepel", "dplyr", "scales", "ape", "DECIPHER", "readxl",
-               "ggtreeExtra", "ggnewscale", "readr", "RColorBrewer", "phytools", "rentrez")
+pacman::p_load("ggtree", "stringr", "ggrepel", "dplyr", "scales", "ape", "DECIPHER", "readxl", "viridis",
+               "ggtreeExtra", "ggnewscale", "readr", "RColorBrewer", "phytools", "rentrez", "ggpubr")
 
 # Read in the consensus tree
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
@@ -19,7 +19,7 @@ dev.off()
 
 # Extract the clade that is important
 # Node 1297 (?)
-gl <- groupClade(midtr, .node = 1347)
+gl <- groupClade(midtr, .node = 1288)
 gtfake <- ggtree(gl)
 tips <- gtfake$data$label[gtfake$data$isTip & gtfake$data$group == 1]
 tips
@@ -30,11 +30,11 @@ table(genera)
 accs <- case_when(grepl("WP_|YP_|NP_", tips) ~ paste0(word(tips, sep = "_", 1), "_", word(tips, sep = "_", 2)),
                   TRUE ~ paste0(word(tips, sep = "_", 1)))
 accs
-writeLines(accs, "data/20222001_GDL_accs.txt")
+writeLines(accs, "data/20222001_Caulobacter_GDL_accs.txt")
 
 # Now read in the GDL phylogeny only
 # Keep only the putative spliceases
-splics <- readLines("data/20222001_GDL_accs.txt")
+splics <- readLines("data/20222001_Caulobacter_GDL_accs.txt")
 # Read in the consensus tree
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
 
@@ -67,8 +67,8 @@ unclass <- tibbdf %>%
 unclass
 quers_to_pull <- querselect[grep(paste0(unclass, collapse = "|"), querselect)]
 quers_to_pull
-# fetchr <- entrez_fetch(quers_to_pull, db = "protein", rettype = "fasta")
-# write(fetchr, "~/Documents/github/splicase_analysis/data/unclassified_GDL_substrates.fa")
+fetchr <- entrez_fetch(quers_to_pull, db = "protein", rettype = "fasta")
+write(fetchr, "~/Documents/github/splicase_analysis/data/unclassified_GDL_substrates.fa")
 
 # Read in and parse seqs
 parsr <- readAAStringSet("~/Documents/github/splicase_analysis/data/unclassified_GDL_substrates.fa")
@@ -92,19 +92,22 @@ mergdf <- tibbdf %>%
                                          "candidate", "Candidatus") ~ NA_character_,
                                      TRUE ~ tax_bar))
 mergdf
-# write_csv(mergdf, "data/GDL_raw_taxdf_to_name.csv")
+write_csv(mergdf, "data/GDL_Caulobacter_raw_taxdf_to_name.csv")
 
 
 # Read in the manually-edited taxonomy data
-taxdat <- read_excel("data/GDL_taxonomy_for_Tom.xlsx") %>%
-  dplyr::mutate(protein = "GDL family splicease") #%>%
+taxdat <- read_excel("data/GDL_Caulobacter_raw_taxdf_to_name.xlsx") %>%
+  dplyr::mutate(protein = "") %>%
+  dplyr::filter(tax_6 != "Acidobacteria")
+taxdat
 #dplyr::filter(Rel_abundance = tax_fill)
 
 sort(table(taxdat$tax_fill), decreasing = T)
-length(table(taxdat$tax_fill))
+table(taxdat$tax_fill)
 
 # Read in the palette 
 pal_csv <- read_csv("data/palette_taxa.csv")
+pal_csv[1:20,]
 pal_trim <- pal_csv %>%
   dplyr::filter(taxa %in% unique(taxdat$tax_fill)) %>%
   pull(color)
@@ -112,8 +115,7 @@ pal_trim
 
 unique(taxdat$tax_fill)
 
-
-pdf("output/GDL_taxa_barplot_horizontal.pdf", width = 10, height = 4)
+pdf("output/GDL_taxa_barplot_horizontal.pdf", width = 11, height = 8)
 ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
   geom_bar(position = "stack", stat = "count") +
   scale_fill_manual(values = pal_trim) +
@@ -140,7 +142,7 @@ table(taxdat$tax_fill)
 
 gdl <- data.frame(table(taxdat$tax_fill))
 colnames(gdl) <- c("Taxa", "Count")
-pdf("GDL_donut.pdf")
+pdf("output/GDL_donut.pdf")
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
                       #label = "Taxa",
@@ -155,12 +157,13 @@ dev.off()
 
 
 gdl <- data.frame(table(taxdat$tax_fill))
-gdl
+
+nrow(gdl)
 colnames(gdl) <- c("Taxa", "Count")
-pdf("GDL_donut_phylum.pdf", width = 9)
+pdf("output/GDL_donut_phylum.pdf", width = 10)
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
-                      label = rep("", 6),
+                      label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "black"),
                       #lab.pos = "in",
@@ -172,14 +175,16 @@ dev.off()
 
 
 gdl <- data.frame(table(taxdat$tax_6))
+gdl
 # pal2 <- inferno(15)
-pal2 <- inferno(15)[2:15]
-
+pal2 <- inferno(41)
+pal2
 colnames(gdl) <- c("Taxa", "Count")
+nrow(gdl)
 pdf("GDL_donut_genus.pdf", width = 9)
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
-                     label = rep("", 14),
+                     label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "white"),
                      # lab.pos = "none",
@@ -190,10 +195,10 @@ dev.off()
 
 labs <- paste0(round((gdl$Count/sum(gdl$Count) * 100), 2), "%")
 labs
-pdf("GDL_donut_genus_labeled.pdf", width = 9)
+pdf("output/GDL_donut_genus_unlabeled.pdf", width = 9)
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
-                      label = labs,
+                      label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "white"),
                       # lab.pos = "none",
@@ -202,7 +207,7 @@ donut <- ggdonutchart(data = gdl,
 donut
 dev.off()
 
-pdf("output/GDL_genus_barplot_horizontal.pdf", width = 10, height = 2.5)
+pdf("output/GDL_genus_barplot_horizontal.pdf", width = 18, height = 2.5)
 ggplot(taxdat, aes(x = protein, fill = tax_6)) +
   geom_bar(position = "stack", stat = "count") +
   scale_fill_manual(values = pal2) +
@@ -216,7 +221,7 @@ ggplot(taxdat, aes(x = protein, fill = tax_6)) +
         legend.text = element_text(size = 12)) +
   scale_x_discrete(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
-  guides(fill=guide_legend(ncol=2)) +
+  guides(fill=guide_legend(ncol=5)) +
   coord_flip()
 #scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
 # theme(axis.text.x = element_text(angle = 75, hjust = 1),

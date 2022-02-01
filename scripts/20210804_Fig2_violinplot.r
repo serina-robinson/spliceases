@@ -61,8 +61,8 @@ pdf("output/splicease_non_splicease_plot_density_6genes.pdf", width = 4, height 
 plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
   #geom_beeswarm(dodge.width = 0.7, cex = 20) +
   #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
-  geom_violin(alpha = 0.4, aes(color = is_splicease, fill = is_splicease)) +
-  geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.5,
+  geom_violin(alpha = 0.2, aes(color = is_splicease, fill = is_splicease)) +
+  geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.05,
              aes(color = is_splicease), size = 1) +
   scale_color_manual(values = c("gray50", "#E41A1C")) +
   scale_fill_manual(values = c("gray50", "#E41A1C")) +
@@ -77,6 +77,65 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
 plt3
 dev.off()
 
+pdf("output/splicease_non_splicease_plot_density_6genes.pdf", width = 4, height = 3.5)
+plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
+  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
+  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
+  geom_violin(alpha = 0.4, aes(color = is_splicease, fill = is_splicease)) +
+  geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.1,
+             aes(color = is_splicease), size = 1) +
+  scale_color_manual(values = c("gray50", "#E41A1C")) +
+  scale_fill_manual(values = c("gray50", "#E41A1C")) +
+  theme_pubr() +
+  ylab("XYG frequency") +
+  theme(axis.title.x = element_blank(), legend.position = "none") +
+  geom_signif(
+    comparisons = list(c("Spliceases", "Other rSAM-SPASM")),
+    #map_signif_level = TRUE,
+    color = "black",
+    map_signif_level = function(p) sprintf("*** p = %.2g", p))
+plt3
+dev.off()
+
+svglite("output/violin_plot_svg_export.svg",  width = 4, height = 3.5)
+plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
+  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
+  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
+  geom_violin(alpha = 0.4, aes(color = is_splicease, fill = is_splicease)) +
+  geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.1,
+             aes(color = is_splicease), size = 1) +
+  scale_color_manual(values = c("gray50", "#E41A1C")) +
+  scale_fill_manual(values = c("gray50", "#E41A1C")) +
+  theme_pubr() +
+  ylab("XYG frequency") +
+  theme(axis.title.x = element_blank(), legend.position = "none") +
+  geom_signif(
+    comparisons = list(c("Spliceases", "Other rSAM-SPASM")),
+    #map_signif_level = TRUE,
+    color = "black",
+    map_signif_level = function(p) sprintf("*** p = %.2g", p))
+plt3
+dev.off()
+
+pdf("output/violin_plot_pdf_export.pdf", width = 4, height = 3.5)
+plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
+  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
+  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
+  geom_violin(alpha = 0.4, aes(color = is_splicease, fill = is_splicease)) +
+  geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.1,
+             aes(color = is_splicease), size = 1) +
+  scale_color_manual(values = c("gray50", "#E41A1C")) +
+  scale_fill_manual(values = c("gray50", "#E41A1C")) +
+  theme_pubr() +
+  ylab("XYG frequency") +
+  theme(axis.title.x = element_blank(), legend.position = "none") +
+  geom_signif(
+    comparisons = list(c("Spliceases", "Other rSAM-SPASM")),
+    #map_signif_level = TRUE,
+    color = "black",
+    map_signif_level = function(p) sprintf("*** p = %.2g", p))
+plt3
+dev.off()
 
 
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Splicease"]))
@@ -108,16 +167,16 @@ res <- wilcox.test(splicdat$yg_density,
 
 
 # Now compare splicease sub-clades
-pdf("output/splicease_groups_split.pdf", width = 15, height = 9)
-plt3 <- ggplot(datjoin, aes(group, yg_density)) + #yg_n_recount)) + 
-  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
-  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
-  geom_violin(alpha = 0.5) +
-  geom_point(position = position_jitter(seed = 1, width = 0.1)) +
-  scale_color_manual(values = c("gray50", "#E41A1C")) +
-  theme_pubr() +
-  ylab("XYG frequency") +
-  theme(axis.title.x = element_blank(), legend.position = "none")
-plt3
-dev.off()
+# pdf("output/splicease_groups_split.pdf", width = 15, height = 9)
+# plt3 <- ggplot(datjoin, aes(group, yg_density)) + #yg_n_recount)) + 
+#   #geom_beeswarm(dodge.width = 0.7, cex = 20) +
+#   #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
+#   geom_violin(alpha = 0.5) +
+#   geom_point(position = position_jitter(seed = 1, width = 0.1)) +
+#   scale_color_manual(values = c("gray50", "#E41A1C")) +
+#   theme_pubr() +
+#   ylab("XYG frequency") +
+#   theme(axis.title.x = element_blank(), legend.position = "none")
+# plt3
+# dev.off()
 

@@ -1,6 +1,6 @@
 # Install packages
 pacman::p_load("data.table", "tidyverse", "RColorBrewer", "DECIPHER", "rentrez", "ggpubr", "colorspace",
-               "Biostrings", "treeio", "ggtree", "scales", "Biostrings", "readxl", "pals")
+               "Biostrings", "treeio", "ggtree", "scales", "Biostrings", "readxl", "pals", "svglite")
 
 # Read in the consensus tree
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
@@ -94,7 +94,7 @@ palrem <- c(pal3[3], pal3[4], pal3[7],
 pal4 <- pal3[!pal3 %in% palrem]
 
 
-pdf("output/taxa_barplot_horizontal.pdf", width = 7)
+pdf("output/taxa_barplot_horizontal_change_ticks.pdf", width = 7)
 ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
   geom_bar(position = "stack", stat = "count") +
   scale_fill_manual(values = pal4) +
@@ -104,10 +104,10 @@ ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         legend.title = element_blank(),
-        axis.text.y = element_text(size = 18),
+        axis.text.y = element_text(size = 22),
         legend.text = element_text(size = 12)) +
   scale_x_discrete(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100), breaks = 10) +
   guides(fill=guide_legend(ncol=2)) +
   coord_flip()
   #scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
@@ -159,26 +159,49 @@ colordf <- data.frame(color = pal4,
 taxa = sort(unique(sumdat$tax_fill)))
 write_csv(colordf, 'data/palette_taxa.csv')
 
-pdf("output/taxa_barplot_percentage_horizontal_wide.pdf", width = 14, height = 3.5)
-ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +
+pal4
+pal4[pal4 == "#A94E35"] <- "gray80"
+
+colnames(sumdat)[colnames(sumdat) == "perc"] <- "Relative abundance (%)"
+pdf("output/taxa_barplot_percentage_horizontal_wide_change_ticks.pdf", width = 17, height = 2.5)
+ggplot(sumdat, aes(x = protein, y = `Relative abundance (%)`, fill = tax_fill)) +
   geom_bar(position = "stack", stat = "identity") +
   scale_fill_manual(values = pal4) +
   theme_pubr() +
   theme(legend.position = "right",
-        axis.title.x = element_blank(),
+        axis.title.x = element_text( size = 15),
         axis.title.y = element_blank(),
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 12),
+        axis.text.x = element_text(size = 15),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank(),
         legend.text = element_text(size = 12)) +
   scale_x_discrete(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0)) +
-  guides(fill=guide_legend(ncol=2)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100), breaks = seq(0, 100, by = 10)) +
+  guides(fill=guide_legend(ncol=3)) +
   coord_flip()
 #scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
 # theme(axis.text.x = element_text(angle = 75, hjust = 1),
 #       #   axis.text.y = element_blank(),
 #       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
-  
+
+svglite("output/horizontal_barplot_svg_export.svg", width = 17, height = 2.5)
+ggplot(sumdat, aes(x = protein, y = `Relative abundance (%)`, fill = tax_fill)) +
+  geom_bar(position = "stack", stat = "identity") +
+  scale_fill_manual(values = pal4) +
+  theme_pubr() +
+  theme(legend.position = "right",
+        axis.title.x = element_text( size = 15),
+        axis.title.y = element_blank(),
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        legend.text = element_text(size = 12)) +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100), breaks = seq(0, 100, by = 10)) +
+  guides(fill=guide_legend(ncol=3)) +
+  coord_flip()
+dev.off()
+

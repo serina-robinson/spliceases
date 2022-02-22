@@ -77,6 +77,11 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
 plt3
 dev.off()
 
+nrow(datjoin)
+
+
+
+
 pdf("output/splicease_non_splicease_plot_density_6genes.pdf", width = 4, height = 3.5)
 plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
   #geom_beeswarm(dodge.width = 0.7, cex = 20) +
@@ -96,6 +101,7 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
     map_signif_level = function(p) sprintf("*** p = %.2g", p))
 plt3
 dev.off()
+plt3
 
 svglite("output/violin_plot_svg_export.svg",  width = 4, height = 3.5)
 plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
@@ -131,20 +137,20 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
   theme(axis.title.x = element_blank(), legend.position = "none") +
   geom_signif(
     comparisons = list(c("Spliceases", "Other rSAM-SPASM")),
-    #map_signif_level = TRUE,
+    test = "wilcox.test",
     color = "black",
     map_signif_level = function(p) sprintf("*** p = %.2g", p))
 plt3
 dev.off()
 
 
-hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Splicease"]))
-hist(log(datjoin$yg_density[datjoin$is_splicease == "Splicease"]))
+hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Spliceases"]))
+hist(log(datjoin$yg_density[datjoin$is_splicease == "Spliceases"]))
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Other rSAM-SPASM"]))
 hist(log(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"]))
 
 # Welch's t-test
-dens_diff <- t.test(log(datjoin$yg_density[datjoin$is_splicease == "Splicease"]),
+dens_diff <- t.test(log(datjoin$yg_density[datjoin$is_splicease == "Spliceases"]),
                     log(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"]),
                     alternative = "two.sided",
                     var.equal = FALSE)
@@ -152,19 +158,30 @@ dens_diff
 
 
 # unpaired two-samples Wilcoxon test 
+datjoin$is_splicease
 count_diff <- wilcox.test(datjoin$yg_n_recount[datjoin$is_splicease == "Other rSAM-SPASM"],
-                          datjoin$yg_n_recount[datjoin$is_splicease == "Splicease"],
+                          datjoin$yg_n_recount[datjoin$is_splicease == "Spliceases"],
                           alternative = "two.sided",
                           exact = FALSE)
 count_diff 
 
 # unpaired two-samples Wilcoxon test 
-res <- wilcox.test(splicdat$yg_density, 
-                   otherdat$yg_density,
+res <- wilcox.test(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"],
+                  datjoin$yg_density[datjoin$is_splicease == "Spliceases"],
                    alternative = "two.sided", # also greater 
-                   exact = FALSE)
+                   exact = FALSE,
+                  conf.int = TRUE)
+
+length(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"]) #2896
+length(datjoin$yg_density[datjoin$is_splicease == "Spliceases"]) # 1400 
 
 
+
+resres2 <- wilcox.test(datjoin$yg_density[datjoin$is_splicease == "Spliceases"],
+                    datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"],
+                    alternative = "greater", # also greater 
+                    exact = FALSE)
+res2
 
 # Now compare splicease sub-clades
 # pdf("output/splicease_groups_split.pdf", width = 15, height = 9)

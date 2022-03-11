@@ -77,7 +77,7 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
 plt3
 dev.off()
 
-nrow(datjoin)
+table(datjoin$is_splicease)
 
 
 

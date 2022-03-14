@@ -11,14 +11,8 @@ querselect <- case_when(grepl("WP_|NP_|YP_", seqselect) ~
                                  "_", word(seqselect, 2, sep = "_")),
                         TRUE ~ paste0(word(seqselect, 1, sep = "_")))
 
-# Set neighborhood size of 3
-# Radical SAM is usually 6
-# nbsize <- c(5, 7) 
-# nbsize <- c(4, 5, 7, 8)
+# Set neighborhood size of plus/minus 3 ORFs
 nbsize <- c(3, 4, 5, 7, 8, 9)
-# nbsize <- c(2, 3, 4, 5, 7, 8, 9, 10) 
-# nbsize  <- c(1, 2, 3, 4, 5, 7, 8, 9, 10, 11)
-
 
 # Filter only for spliceases
 gbardat <- read_csv("data/XYG_count_data/unfiltered_combined_YG_YA_count_data.csv") %>%
@@ -52,8 +46,8 @@ write_csv(yg_dat_check, "output/yg_plus_mins_3_ORFs_check_aa.csv")
 
 # Probe the number of unique XYA and XYG hits
 overlap <- length(intersect(unique(yg_dat$protein_acc), unique(ya_dat$protein_acc)))
-xyg_unique <- length(unique(yg_dat$protein_acc)) #- overlap
-xya_unique <- length(unique(ya_dat$protein_acc)) #- overlap
+xyg_unique <- length(unique(yg_dat$protein_acc)) 
+xya_unique <- length(unique(ya_dat$protein_acc))
 
 # Calculate the substrate properties
 yg_max_3 <- yg_dat %>%
@@ -62,7 +56,6 @@ yg_max_3 <- yg_dat %>%
   dplyr::filter(!duplicated(protein_acc)) %>%
   dplyr::arrange(aa_len) %>%
   dplyr::filter(aa_len >= 600) %>%
- #  dplyr::slice((nrow(.)-40):nrow(.)) %>%
   dplyr::select(row_id, query, genus_species, nucleotide_acc, protein_acc, name1,
                 pfam_id1, description1, aa, aa_len)
 write_csv(yg_max_3, "output/longest_substrates_xyg_plus_minus_3_ORFs.csv")
@@ -107,14 +100,9 @@ yabar_6 <- yabar_6 +
         legend.position = "none",
         legend.title = element_blank()) 
 
-#### NB size of 2
-# Set neighborhood size
-# Radical SAM is usually 6
+# Set neighborhood size plus/minus 1 ORF
  nbsize <- c(5, 7) 
-# nbsize <- c(4, 5, 7, 8)
-# nbsize <- c(3, 4, 5, 7, 8, 9)
-# nbsize <- c(2, 3, 4, 5, 7, 8, 9, 10) 
-# nbsize  <- c(1, 2, 3, 4, 5, 7, 8, 9, 10, 11)
+
  gbardat <- read_csv("data/XYG_count_data/unfiltered_combined_YG_YA_count_data.csv") %>%
    dplyr::filter(grepl(paste0(querselect, collapse = "|"), query_acc)) %>%
    dplyr::filter(row_id %in% nbsize) %>%
@@ -138,7 +126,7 @@ yabar_6 <- yabar_6 +
 hex_values <-c(microshades_palette("micro_purple", 4, lightest = TRUE)[4], 
                microshades_palette("micro_blue", 3, lightest = TRUE)[3],
                microshades_palette("micro_orange", 3, lightest = TRUE)[3])
-#pal2 <- c("#E0DAEA", hex_values[2], hex_values[3])
+
 # Bar plot
 ygbar_2 <- ggplot(yg_dat, aes(x = value)) +
   geom_bar(aes(fill = aa_class), position = "dodge", stat = "count") +
@@ -150,8 +138,7 @@ ygbar_2 <- ygbar_2 +
         axis.title = element_blank(),
         plot.title = element_blank(),
         legend.position = "top",
-        legend.title = element_blank())# +
-#ggtitle('A')
+        legend.title = element_blank())
 
 yabar_2 <- ggplot(ya_dat, aes(x = value)) +
   geom_bar(aes(fill = aa_class), position = "dodge", stat = "count") +
@@ -160,7 +147,6 @@ yabar_2 <- ggplot(ya_dat, aes(x = value)) +
   scale_y_continuous(limits = c(0, 1000), expand = c(0, 0))
 
 yabar_2 <- yabar_2 +
-  #ggtitle('C') +
   theme(axis.text = element_text(size = 12),
         axis.title = element_blank(),
         plot.title = element_blank(),

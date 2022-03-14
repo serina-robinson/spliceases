@@ -6,7 +6,6 @@ pacman::p_load("ggtree", "stringr", "ggrepel", "dplyr", "scales", "ape", "DECIPH
 tr <- read.tree("data/seqs_for_phylogeny/3418_fasttree_gt_10.nwk")
 torem <- readLines("data/20210601_spliceases_cut_from_dendro.txt") 
 newtr <- keep.tip(tr, grep(paste0(torem, collapse = "|"), tr$tip.label))
-#newtr <- drop.tip(newtr, grep("VVB77801", newtr$tip.label))
 midtr <- midpoint.root(newtr)
 
 pdf("output/rectangular_geom_tiplabs.pdf", width = 50, height = 120)
@@ -17,8 +16,7 @@ gdf <- ggtree(midtr, layout = "rectangular", color = "gray60") +
 gdf 
 dev.off()
 
-# Extract the clade that is important
-# Node 1297 (?)
+# Extract the GDL clade
 gl <- groupClade(midtr, .node = 1288)
 gtfake <- ggtree(gl)
 tips <- gtfake$data$label[gtfake$data$isTip & gtfake$data$group == 1]
@@ -29,7 +27,6 @@ table(genera)
 
 accs <- case_when(grepl("WP_|YP_|NP_", tips) ~ paste0(word(tips, sep = "_", 1), "_", word(tips, sep = "_", 2)),
                   TRUE ~ paste0(word(tips, sep = "_", 1)))
-accs
 writeLines(accs, "data/20222001_Caulobacter_GDL_accs.txt")
 
 # Now read in the GDL phylogeny only
@@ -55,10 +52,6 @@ tibbdf <- taxdf %>%
   dplyr::mutate(tax_bar = case_when(grepl("roteobacteria", tax_2) ~ tax_3,
                                     tax_2 %in% c("Unknown") ~ tax_6,
                                     TRUE ~ tax_2))
-table(tibbdf$tax_6)
-
-# write_csv(tibbdf, "data/raw_taxdf.csv")
-
 unclass <- tibbdf %>%
   dplyr::filter(tax_6 %in% c("bacterium", "Bacteria", "",
                              "unclassified", "uncultured",
@@ -91,16 +84,12 @@ mergdf <- tibbdf %>%
                                          "unclassified", "uncultured",
                                          "candidate", "Candidatus") ~ NA_character_,
                                      TRUE ~ tax_bar))
-mergdf
 write_csv(mergdf, "data/GDL_Caulobacter_raw_taxdf_to_name.csv")
-
 
 # Read in the manually-edited taxonomy data
 taxdat <- read_excel("data/GDL_Caulobacter_raw_taxdf_to_name.xlsx") %>%
   dplyr::mutate(protein = "") %>%
   dplyr::filter(tax_6 != "Acidobacteria")
-taxdat
-#dplyr::filter(Rel_abundance = tax_fill)
 
 sort(table(taxdat$tax_fill), decreasing = T)
 table(taxdat$tax_fill)
@@ -111,9 +100,6 @@ pal_csv[1:20,]
 pal_trim <- pal_csv %>%
   dplyr::filter(taxa %in% unique(taxdat$tax_fill)) %>%
   pull(color)
-pal_trim
-
-unique(taxdat$tax_fill)
 
 pdf("output/GDL_taxa_barplot_horizontal.pdf", width = 11, height = 8)
 ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
@@ -131,10 +117,6 @@ ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
   scale_y_continuous(expand = c(0,0)) +
   guides(fill=guide_legend(ncol=2)) +
   coord_flip()
-#scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
-# theme(axis.text.x = element_text(angle = 75, hjust = 1),
-#       #   axis.text.y = element_blank(),
-#       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
 
 table(taxdat$tax_fill)
@@ -145,10 +127,8 @@ colnames(gdl) <- c("Taxa", "Count")
 pdf("output/GDL_donut.pdf")
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
-                      #label = "Taxa",
                       fill = "Taxa",
                       lab.font = c(8, "plain", "black"),
-                      #lab.pos = "in",
                       color = "white",
                       palette = pal_trim)
 donut
@@ -166,7 +146,6 @@ donut <- ggdonutchart(data = gdl,
                       label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "black"),
-                      #lab.pos = "in",
                       color = "white",
                       palette = pal_trim)
 donut
@@ -175,19 +154,15 @@ dev.off()
 
 
 gdl <- data.frame(table(taxdat$tax_6))
-gdl
-# pal2 <- inferno(15)
 pal2 <- inferno(41)
-pal2
+
 colnames(gdl) <- c("Taxa", "Count")
-nrow(gdl)
 pdf("GDL_donut_genus.pdf", width = 9)
 donut <- ggdonutchart(data = gdl,
                       x = "Count",
                      label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "white"),
-                     # lab.pos = "none",
                       color = "white",
                       palette = pal2)
 donut
@@ -201,7 +176,6 @@ donut <- ggdonutchart(data = gdl,
                       label = rep("", nrow(gdl)),
                       fill = "Taxa",
                       lab.font = c(8, "plain", "white"),
-                      # lab.pos = "none",
                       color = "white",
                       palette = pal2)
 donut
@@ -223,10 +197,6 @@ ggplot(taxdat, aes(x = protein, fill = tax_6)) +
   scale_y_continuous(expand = c(0,0)) +
   guides(fill=guide_legend(ncol=5)) +
   coord_flip()
-#scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
-# theme(axis.text.x = element_text(angle = 75, hjust = 1),
-#       #   axis.text.y = element_blank(),
-#       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
 
 

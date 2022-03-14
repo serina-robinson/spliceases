@@ -14,16 +14,14 @@ dendr <- dend %>%
 
 groupInfo <- split(tr$tip.label, dendr$dendrsplit)
 phylip <- groupOTU(tr, groupInfo)
-gtfake <- ggtree(phylip)
+gtfake <- ggtree(phylip) # dummy ggtree to assign colors
 
 # Use the dendrogram to color
 pal <- palette(colorRampPalette(brewer.pal(8,"Set2"))(8))
 pal2 <- brewer.pal(8,"Set1")[c(1:3, 5)]
-# pal3 <- c("gray40", pal[c(2)], pal[1],  "#E41A1C", pal[5], pal[6],  "gray70", pal[3], pal[4], "goldenrod4")
 pal3 <- c(rep("gray50", 3),  "#E31A1C", rep("gray50", 6))
 
-
-# ggtree
+# Plot using ggtree
 gtr <- ggtree(tr, color = pal3[as.factor(gtfake$data$group)],
               layout = "fan", open.angle = 0, 
               branch.length = "none", size = 0.25)
@@ -53,9 +51,8 @@ metadat <- data.frame(label = gtr$data$label[gtr$data$isTip]) %>%
 gdf <- gtr %<+% metadat
 
 # Set neighborhood size
-# Radical SAM is usually in position 6
 # nbsize <- c(5, 7) 
-# bsize <- c(4, 5, 7, 8)
+# nbsize <- c(4, 5, 7, 8)
 nbsize <- c(3, 4, 5, 7, 8, 9)
 # nbsize <- c(2, 3, 4, 5, 7, 8, 9, 10) 
 # nbsize  <- c(1, 2, 3, 4, 5, 7, 8, 9, 10, 11)
@@ -64,7 +61,6 @@ nbsize <- c(3, 4, 5, 7, 8, 9)
 gbardat <- read_csv("data/XYG_count_data/combined_YG_count_data.csv")
 
 gbarmerg <- gbardat %>%
-  #dplyr::distinct(., query, variable, .keep_all =T) %>%
   dplyr::mutate(uniq_id = paste0(protein_acc, "_", variable)) %>%
   dplyr::filter(!duplicated(uniq_id)) %>%
   dplyr::filter(row_id %in% nbsize) %>% # set neighborhood size
@@ -75,14 +71,11 @@ gbarmerg <- gbardat %>%
   dplyr::mutate(yg_density = sum(yg_n_recount)/sum(aa_len)) %>%
   ungroup()
 
-summary(gbarmerg$yg_density)
-
 mergdat <- metadat %>%
   dplyr::left_join(., gbarmerg, by = "query_acc")
 
-# Now try constraining the neighborhood size
+# Constrain neighborhood size
 splics <- readLines("data/20210601_spliceases_cut_from_dendro.txt") 
-label %in% splics
 
 nbdat <- mergdat %>%
   arrange(desc(yg_density)) %>%
@@ -97,10 +90,8 @@ sort(table(nbdat$yg_density))
 pal <- palette(colorRampPalette(brewer.pal(8,"Set2"))(8))
 pal2 <- brewer.pal(8,"Set1")[c(1:3, 5)]
 pal2
-pal3 <- c("#E31A1C", "gray40", pal[2],"red", "#8DA0CB", #"#377EB8",
+pal3 <- c("#E31A1C", "gray40", pal[2],"red", "#8DA0CB", 
           pal[c(5, 4)], "gray40", pal[6],  "navyblue","goldenrod4")
-table(nbdat$barcol)
-
 
 pdf(paste0("output/20210803_yg_density_", length(nbsize), "_arranged_genes.pdf"), width = 10, height = 10)
 gpl <- gdf + 
@@ -126,4 +117,3 @@ gpl <- gdf +
 rotate_tree(gpl, 90)
 dev.off()
 
-table(nbdat$barcol)

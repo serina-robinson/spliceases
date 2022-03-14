@@ -25,38 +25,13 @@ datjoin <- dat %>%
   dplyr::mutate(aa_len = nchar(aa)) %>%
   dplyr::mutate(uniq_id = paste0(protein_acc, "_", variable)) %>%
   dplyr::filter(!duplicated(uniq_id)) %>%
-  # dplyr::filter(yg_n_recount != 0) %>%
   dplyr::filter(row_id %in% c(3,4,5,7,8,9)) %>%
   dplyr::group_by(query) %>%
   dplyr::mutate(yg_density = (sum(yg_n_recount)/sum(aa_len))) %>%
   ungroup()
 datjoin$group[is.na(datjoin$group)] <- 11
-
-# pdf("output/splicease_between_stats_density.pdf")
-# plt1 <- ggstatsplot::ggbetweenstats(
-#   data = datjoin,
-#   x = is_splicease,
-#   y = yg_density
-# )
-# plt1
-# dev.off()
-# 
-# pdf("output/splicease_between_stats_count.pdf")
-# plt2 <- ggstatsplot::ggbetweenstats(
-#   data = datjoin,
-#   x = is_splicease,
-#   y = yg_n_recount
-# )
-# plt2
-dev.off()
-
-# Test a random sub-sample
-set.seed(1234)
-dat_split <- initial_split(subdat, prop = 1/10, strata = "is_splicease")
-dat_train <- training(dat_split)
-dat_train
-
 datjoin$group <- as.factor(datjoin$group)
+
 pdf("output/splicease_non_splicease_plot_density_6genes.pdf", width = 4, height = 3.5)
 plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
   #geom_beeswarm(dodge.width = 0.7, cex = 20) +

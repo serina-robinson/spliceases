@@ -21,9 +21,6 @@ tibbdf <- taxdf %>%
   dplyr::mutate(tax_bar = case_when(grepl("roteobacteria", tax_2) ~ tax_3,
                                     tax_2 %in% c("Unknown") ~ tax_6,
                           TRUE ~ tax_2))
-table(tibbdf$tax_bar)
-
-# write_csv(tibbdf, "data/raw_taxdf.csv")
 
 unclass <- tibbdf %>%
   dplyr::filter(tax_6 %in% c("bacterium", "Bacteria", "",
@@ -32,9 +29,8 @@ unclass <- tibbdf %>%
   pull(tax_1)
 
 quers_to_pull <- querselect[grep(paste0(unclass, collapse = "|"), querselect)]
-quers_to_pull
-#fetchr <- entrez_fetch(quers_to_pull, db = "protein", rettype = "fasta")
-#write(fetchr, "~/Documents/github/splicase_analysis/data/unclassified_spliceases.fa")
+fetchr <- entrez_fetch(quers_to_pull, db = "protein", rettype = "fasta")
+write(fetchr, "~/Documents/github/splicase_analysis/data/unclassified_spliceases.fa")
 
 # Read in and parse seqs
 parsr <- readAAStringSet("~/Documents/github/splicase_analysis/data/unclassified_spliceases.fa")
@@ -50,8 +46,7 @@ parsdf$quer_acc <- gsub("\\.1", "", parsdf$quer_acc)
 parsdf$quer_acc
 tibbdf$tax_1
 
-# Merge with the previous df 
-parsdf$nam_1
+# Merge data
 mergdf <- tibbdf %>%
   left_join(parsdf, by = c("tax_1" = "quer_acc")) %>%
   dplyr::mutate(tax_fill = case_when(tax_6 %in% 
@@ -60,24 +55,15 @@ mergdf <- tibbdf %>%
                              "candidate", "Candidatus") ~ NA_character_,
                              TRUE ~ tax_bar))
 
-# write_csv(mergdf, "data/raw_taxdf_to_name.csv")
-
-
 # Entrez fetch for the sequences without taxa
 tofetch <- case_when(grepl("WP_|NP_|YP_", seqselect) ~ 
                paste0(word(seqselect, 1, sep = "_"),
                       "_", word(seqselect, 2, sep = "_")),
              TRUE ~ paste0(word(seqselect, 1, sep = "_")))
 
-# Filter data for spliceases
-# gbardat <- read_csv("data/XYG_count_data/combined_YG_count_data.csv") %>%
-#   dplyr::filter(grepl(paste0(querselect, collapse = "|"), query_acc)) %>%
-#   dplyr::filter(row_id %in% c(3, 4, 5, 7, 8, 9))
-
 # Read in the manually-edited taxonomy data
 taxdat <- read_excel("data/raw_taxdf_manually_edited.xlsx") %>%
-  dplyr::mutate(protein = "Splicease") #%>%
-  #dplyr::filter(Rel_abundance = tax_fill)
+  dplyr::mutate(protein = "Splicease") 
 
 sort(table(taxdat$tax_fill), decreasing = T)
 length(table(taxdat$tax_fill))
@@ -89,10 +75,8 @@ pal.bands(kelly())
 pal.bands(tol())
 palrem <- c(pal3[3], pal3[4], pal3[7],
           pal3[9], pal3[13], pal3[18], pal3[19], 
-          pal3[20], pal3[22]) #"#F2F3F4", "#F3C300",
-        #  "#875692", "#6E8F01", "#A1CAF1", "#BE0032")
+          pal3[20], pal3[22])
 pal4 <- pal3[!pal3 %in% palrem]
-
 
 pdf("output/taxa_barplot_horizontal_change_ticks.pdf", width = 7)
 ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
@@ -110,22 +94,13 @@ ggplot(taxdat, aes(x = protein, fill = tax_fill)) +
   scale_y_continuous(expand = c(0,0), limits = c(0,100), breaks = 10) +
   guides(fill=guide_legend(ncol=2)) +
   coord_flip()
-  #scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
-  # theme(axis.text.x = element_text(angle = 75, hjust = 1),
-  #       #   axis.text.y = element_blank(),
-  #       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
-
 
 sumdat <- taxdat %>%
   group_by(tax_fill) %>%
   add_count(tax_fill) %>%
   dplyr::mutate(perc = n/nrow(.) * 100) %>%
   dplyr::distinct(tax_fill, .keep_all = T)
-sum(sumdat$perc)
-
-
-pal4 
 
 pdf("output/taxa_barplot_percentage_horizontal_stacked.pdf", width = 10, height = 4)
 ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +
@@ -147,19 +122,12 @@ ggplot(sumdat, aes(x = protein, y = perc, fill = tax_fill)) +
   scale_x_discrete(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
   guides(fill=guide_legend(ncol=5)) +
-  
   coord_flip()
-#scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
-# theme(axis.text.x = element_text(angle = 75, hjust = 1),
-#       #   axis.text.y = element_blank(),
-#       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
 
 colordf <- data.frame(color = pal4,
 taxa = sort(unique(sumdat$tax_fill)))
 write_csv(colordf, 'data/palette_taxa.csv')
-
-pal4
 pal4[pal4 == "#A94E35"] <- "gray80"
 
 colnames(sumdat)[colnames(sumdat) == "perc"] <- "Relative abundance (%)"
@@ -180,10 +148,6 @@ ggplot(sumdat, aes(x = protein, y = `Relative abundance (%)`, fill = tax_fill)) 
   scale_y_continuous(expand = c(0,0), limits = c(0,100), breaks = seq(0, 100, by = 10)) +
   guides(fill=guide_legend(ncol=3)) +
   coord_flip()
-#scale_y_continuous(limits = c(0,1000), breaks = c(seq(from = 0, to = 1000, by = 100)))
-# theme(axis.text.x = element_text(angle = 75, hjust = 1),
-#       #   axis.text.y = element_blank(),
-#       plot.margin = margin(2, 2, 2, 2, "cm"))
 dev.off()
 
 svglite("output/horizontal_barplot_svg_export.svg", width = 17, height = 2.5)

@@ -25,42 +25,17 @@ datjoin <- dat %>%
   dplyr::mutate(aa_len = nchar(aa)) %>%
   dplyr::mutate(uniq_id = paste0(protein_acc, "_", variable)) %>%
   dplyr::filter(!duplicated(uniq_id)) %>%
-  # dplyr::filter(yg_n_recount != 0) %>%
   dplyr::filter(row_id %in% c(3,4,5,7,8,9)) %>%
   dplyr::group_by(query) %>%
   dplyr::mutate(yg_density = (sum(yg_n_recount)/sum(aa_len))) %>%
   ungroup()
+
+# Clean up for plotting
 datjoin$group[is.na(datjoin$group)] <- 11
-
-# pdf("output/splicease_between_stats_density.pdf")
-# plt1 <- ggstatsplot::ggbetweenstats(
-#   data = datjoin,
-#   x = is_splicease,
-#   y = yg_density
-# )
-# plt1
-# dev.off()
-# 
-# pdf("output/splicease_between_stats_count.pdf")
-# plt2 <- ggstatsplot::ggbetweenstats(
-#   data = datjoin,
-#   x = is_splicease,
-#   y = yg_n_recount
-# )
-# plt2
-dev.off()
-
-# Test a random sub-sample
-set.seed(1234)
-dat_split <- initial_split(subdat, prop = 1/10, strata = "is_splicease")
-dat_train <- training(dat_split)
-dat_train
-
 datjoin$group <- as.factor(datjoin$group)
+
 pdf("output/splicease_non_splicease_plot_density_6genes.pdf", width = 4, height = 3.5)
-plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) + 
-  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
-  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
+plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) +
   geom_violin(alpha = 0.4, aes(color = is_splicease, fill = is_splicease)) +
   geom_point(position = position_jitter(seed = 1, width = 0.1), alpha = 0.5,
              aes(color = is_splicease), size = 1) +
@@ -71,14 +46,13 @@ plt3 <- ggplot(datjoin, aes(is_splicease, yg_density)) + #yg_n_recount)) +
   theme(axis.title.x = element_blank(), legend.position = "none") +
   geom_signif(
     comparisons = list(c("Spliceases", "Other rSAM-SPASM")),
-    #map_signif_level = TRUE,
     color = "black",
   map_signif_level = function(p) sprintf("*** p = %.2g", p))
 plt3
 dev.off()
 
 
-
+# View the distribution of the dataset for statistical testing
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Splicease"]))
 hist(log(datjoin$yg_density[datjoin$is_splicease == "Splicease"]))
 hist(log(datjoin$yg_n_recount[datjoin$is_splicease == "Other rSAM-SPASM"]))
@@ -106,18 +80,4 @@ res <- wilcox.test(splicdat$yg_density,
                    exact = FALSE)
 
 
-
-# Now compare splicease sub-clades
-pdf("output/splicease_groups_split.pdf", width = 15, height = 9)
-plt3 <- ggplot(datjoin, aes(group, yg_density)) + #yg_n_recount)) + 
-  #geom_beeswarm(dodge.width = 0.7, cex = 20) +
-  #geom_quasirandom(dodge.width = 0.9, cex = 2, alpha = 0.4, method = "smiley") +
-  geom_violin(alpha = 0.5) +
-  geom_point(position = position_jitter(seed = 1, width = 0.1)) +
-  scale_color_manual(values = c("gray50", "#E41A1C")) +
-  theme_pubr() +
-  ylab("XYG frequency") +
-  theme(axis.title.x = element_blank(), legend.position = "none")
-plt3
-dev.off()
 

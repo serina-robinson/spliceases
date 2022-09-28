@@ -84,7 +84,7 @@ dens_diff <- t.test(log(datjoin$yg_density[datjoin$is_splicease == "Spliceases"]
                     var.equal = FALSE)
 dens_diff
 
-# unpaired two-samples Wilcoxon test 
+# unpaired two-samples Wilcoxon test for XYG counts 
 datjoin$is_splicease
 count_diff <- wilcox.test(datjoin$yg_n_recount[datjoin$is_splicease == "Other rSAM-SPASM"],
                           datjoin$yg_n_recount[datjoin$is_splicease == "Spliceases"],
@@ -92,13 +92,14 @@ count_diff <- wilcox.test(datjoin$yg_n_recount[datjoin$is_splicease == "Other rS
                           exact = FALSE)
 count_diff 
 
-# unpaired two-samples Wilcoxon test 
+# unpaired two-samples Wilcoxon test for XYG density 
 res <- wilcox.test(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"],
                   datjoin$yg_density[datjoin$is_splicease == "Spliceases"],
                    alternative = "two.sided", # also greater 
                    exact = FALSE,
-                  conf.int = TRUE)
+                   conf.int = TRUE)
 
+# Calculate group sizes
 length(datjoin$yg_density[datjoin$is_splicease == "Other rSAM-SPASM"]) #2896
 length(datjoin$yg_density[datjoin$is_splicease == "Spliceases"]) # 1400 
 
